@@ -19,10 +19,10 @@ const cli = meow(`
 
 	Examples
 	  $ latest-release sharkdp/pastel
-	  // lists all the package links from the latest release
+	  // lists all the assets links from the latest release
 
 	  $ latest-release sharkdp/pastel -p darwin -d
-	  // downloads the package containing "darwin" in the filename
+	  // downloads the assets containing "darwin" in the filename
 `, {
 		flags: {
 			download: {
