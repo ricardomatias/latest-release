@@ -1,5 +1,5 @@
 {
-	"name": "latest-release",
+	"name": "@ricardomatias/latest-release",
 	"version": "0.0.1",
 	"description": "Download the latest release assets from any repo on github",
 	"license": "MIT",
@@ -29,7 +29,8 @@
 		"latest",
 		"asset",
 		"release",
-		"github"
+		"github",
+		"download"
 	],
 	"dependencies": {
 		"chalk": "^2.4.2",

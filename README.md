@@ -6,7 +6,7 @@
 ## Install
 
 ```
-$ npm install --global latest-release
+$ npm install --global @ricardomatias/latest-release
 ```
 
 ## Usage
