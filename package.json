@@ -1,0 +1,46 @@
+{
+	"name": "latest-release",
+	"version": "0.0.1",
+	"description": "Download the latest release assets from any repo on github",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/ricardomatias/latest-release.git"
+	},
+	"author": {
+		"name": "Ricardo Matias",
+		"url": "https://github.com/ricardomatias"
+	},
+	"bin": {
+		"latest-release": "cli.js"
+	},
+	"engines": {
+		"node": ">=8"
+	},
+	"scripts": {
+		"test": "echo 'latest-release'"
+	},
+	"files": [
+		"cli.js"
+	],
+	"keywords": [
+		"cli",
+		"cli-app",
+		"latest",
+		"asset",
+		"release",
+		"github"
+	],
+	"dependencies": {
+		"chalk": "^2.4.2",
+		"meow": "^5.0.0",
+		"node-fetch": "^2.6.0",
+		"progress": "^2.0.3",
+		"url-regex": "^5.0.0"
+	},
+	"devDependencies": {
+		"eslint": "^5.16.0",
+		"eslint-config-google": "^0.10.0",
+		"eslint-plugin-import": "^2.18.2"
+	}
+}
