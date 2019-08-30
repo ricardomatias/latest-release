@@ -2,6 +2,8 @@
 
 > Download the latest release assets from any repo on github
 
+![screencast](https://github.com/ricardomatias/latest-release/blob/master/latest-screencast.gif)
+
 
 ## Install
 
