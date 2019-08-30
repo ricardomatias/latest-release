@@ -52,7 +52,7 @@ async function downloadPackage(link) {
 					head: '>',
 					complete: ':',
 					incomplete: ' ',
-					width: 20,
+					width: 30,
 					total: len,
 				});
 			}
