@@ -4,7 +4,6 @@
 const meow = require('meow');
 const chalk = require('chalk');
 const latestRelease = require('./');
-const { USAGE } = require('./common');
 
 const cli = meow(chalk`
 	{yellow.bold Usage}
@@ -16,10 +15,13 @@ const cli = meow(chalk`
 
 	{yellow.bold Examples}
 	  $ {green.bold latest-release} sharkdp/pastel
-	  {grey # lists all the assets links from the latest release}
+	  {grey Latest release v0.5.3:}
+	  {grey > https://github.com/sharkdp/pastel/releases/download/v0.5.3/pastel-musl_0.5.3_amd64.deb}
+	  {grey > https://github.com/sharkdp/pastel/releases/download/v0.5.3/pastel-v0.5.3-x86_64-apple-darwin.tar.gz}
 
 	  $ {green.bold latest-release} sharkdp/pastel -p darwin -d
-	  {grey # downloads the assets containing "darwin" in the filename}
+	  {grey Downloading pastel-v0.5.3-x86_64-apple-darwin.tar.gz [::::::::::::::::::::::::::::::] 100% 0.0s}
+	  {grey Asset written to disk!}
 `, {
 	flags: {
 		download: {

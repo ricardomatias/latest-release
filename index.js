@@ -110,7 +110,8 @@ const latestRelease = async ({ userRepo, pattern, download }) => {
 		const version = getVersion(link, pattVersion);
 
 		if (download) {
-			downloadPackage(link);
+			await downloadPackage(link);
+			console.log(chalk`{green.bold Asset written to disk!}`);
 		} else {
 			console.log(''); // separator
 			if (version) {
