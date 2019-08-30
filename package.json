@@ -1,6 +1,6 @@
 {
 	"name": "@ricardomatias/latest-release",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Download the latest release assets from any repo on github",
 	"license": "MIT",
 	"repository": {
