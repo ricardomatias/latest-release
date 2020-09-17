@@ -38,19 +38,19 @@
 		"download"
 	],
 	"dependencies": {
-		"chalk": "^2.4.2",
+		"chalk": "^4.1.0",
 		"del": "^5.1.0",
-		"enquirer": "^2.3.1",
-		"meow": "^5.0.0",
-		"multi-progress": "^2.0.0",
-		"node-fetch": "^2.6.0",
-		"node-graceful": "^2.0.1",
+		"enquirer": "^2.3.6",
+		"meow": "^7.1.1",
+		"multi-progress": "^3.0.0",
+		"node-fetch": "^2.6.1",
+		"node-graceful": "^3.0.0",
 		"progress": "^2.0.3",
 		"url-regex": "^5.0.0"
 	},
 	"devDependencies": {
-		"eslint": "^5.16.0",
-		"eslint-config-google": "^0.10.0",
-		"eslint-plugin-import": "^2.18.2"
+		"eslint": "^7.9.0",
+		"eslint-config-google": "^0.14.0",
+		"eslint-plugin-import": "^2.22.0"
 	}
 }

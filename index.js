@@ -3,7 +3,8 @@ const path = require('path');
 const chalk = require('chalk');
 const urlRegex = require('url-regex');
 const fetch = require('node-fetch');
-const MultiProgress = require('multi-progress');
+const Progress = require('progress');
+const MultiProgress = require('multi-progress')(Progress);
 const { USAGE, getVersion } = require('./common');
 const { MultiSelect } = require('enquirer');
 const graceful = require('node-graceful');
@@ -27,7 +28,7 @@ graceful.on('exit', (done, event, signal) => {
 	}
 });
 
-const multiProgress = new MultiProgress();
+const multiProgress = new MultiProgress(process.stderr);
 
 async function downloadPackage(link) {
 	const filename = path.basename(link);
@@ -76,7 +77,7 @@ async function downloadPackage(link) {
 	});
 }
 
-const latestRelease = async ({ userRepo, pattern, download }) => {
+const latestRelease = async ({ userRepo, pattern = /.*/, download }) => {
 	const url = `https://api.github.com/repos/${userRepo}/releases/latest`;
 	const downloadUrl = `https://github.com/${userRepo}/releases/download/`;
 
@@ -95,18 +96,17 @@ const latestRelease = async ({ userRepo, pattern, download }) => {
 		return;
 	}
 
-	let link;
+	let links = matches.filter((link) => patt.test(link));
 
-	if (pattern) {
-		link = matches.find((link) => patt.test(link));
+	if (pattern && links.length === 0) {
+		console.log(''); // separator
+		console.log(chalk`{red Oops!} No matching release found for ${pattern}`);
+		console.log(USAGE);
+		return;
+	}
 
-		if (!link) {
-			console.log(''); // separator
-			console.log(chalk`{red Oops!} No matching release found for ${pattern}`);
-			console.log(USAGE);
-			return;
-		}
-
+	if (links.length == 1) {
+		const link = links[0];
 		const version = getVersion(link, pattVersion);
 
 		if (download) {
@@ -123,7 +123,7 @@ const latestRelease = async ({ userRepo, pattern, download }) => {
 		return;
 	}
 
-	const links = matches.filter((link) => pattUrls.test(link));
+	links = links.filter((link) => pattUrls.test(link));
 
 	if (!links.length) {
 		console.log(chalk`{red Oops!} No assets found to download`);
