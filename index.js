@@ -5,10 +5,39 @@ const urlRegex = require('url-regex');
 const fetch = require('node-fetch');
 const Progress = require('progress');
 const MultiProgress = require('multi-progress')(Progress);
-const { USAGE, getVersion } = require('./common');
-const { MultiSelect } = require('enquirer');
+const { USAGE, getVersion, findRepo, updateRepo } = require('./common');
+const { prompt, Confirm, MultiSelect } = require('enquirer');
 const graceful = require('node-graceful');
 const del = require('del');
+const Conf = require('conf');
+const toSemver = require('to-semver');
+
+const schema = {
+	repos: {
+		type: "array",
+		items: {
+			type: "object",
+			properties: {
+				name: { type: "string" },
+				version: { type: "string" }
+			}
+		}
+	}
+};
+const config = new Conf({ schema, defaults: {
+	repos: []
+}, clearInvalidConfig: true });
+
+config.set('repos', [
+	{
+		name: 'sharkdp/pastel',
+		version: '0.7.1'
+	},
+	{
+		name: 'zyedidia/micro',
+		version: '2.0.3'
+	}
+]);
 
 const PROMPT_OPTS = {
 	name: 'value',
@@ -84,6 +113,9 @@ const latestRelease = async ({ userRepo, pattern = /.*/, download }) => {
 	const patt = new RegExp(pattern);
 	const pattUrls = new RegExp(downloadUrl);
 	const pattVersion = new RegExp(/download\/(?<version>.*)\//);
+	const repoConfig = findRepo(config, userRepo);
+
+	console.log(repoConfig);
 
 	const res = await fetch(url);
 	const text = await res.text();
@@ -96,21 +128,57 @@ const latestRelease = async ({ userRepo, pattern = /.*/, download }) => {
 		return;
 	}
 
-	let links = matches.filter((link) => patt.test(link));
+	let allLinks = matches.filter((link) => patt.test(link));
 
-	if (pattern && links.length === 0) {
+	if (pattern && allLinks.length === 0) {
 		console.log(''); // separator
 		console.log(chalk`{red Oops!} No matching release found for ${pattern}`);
 		console.log(USAGE);
 		return;
 	}
 
+	const links = allLinks.filter((link) => pattUrls.test(link));
+
+	if (!links.length) {
+		console.log(chalk`{red Oops!} No assets found to download`);
+		console.log(USAGE);
+		return;
+	}
+
+	const version = getVersion(links[0], pattVersion);
+	let semverVersion;
+
+	if (repoConfig) {
+		semverVersion = toSemver([repoConfig.version, version]);
+		const latestVersion = semverVersion[0];
+
+		if (latestVersion == repoConfig.version) {
+			console.log(chalk`The latest available version ({blue ${toSemver([version])[0]}}) and your previously downloaded version ({blue ${latestVersion}}) are the same..`);
+
+			const response = await prompt({
+				type: 'toggle',
+				name: 'continue',
+				message: 'Do you want to continue anyway?',
+				enabled: 'Yes',
+				disabled: 'No'
+			});
+
+			if (!response.continue) {
+				return;
+			}
+		}
+	} else {
+		semverVersion = toSemver([version]);
+	}
+
 	if (links.length == 1) {
 		const link = links[0];
-		const version = getVersion(link, pattVersion);
 
 		if (download) {
 			await downloadPackage(link);
+
+			updateRepo(config, userRepo, { name: userRepo, version: semverVersion[0] });
+
 			console.log(chalk`{green.bold Asset written to disk!}`);
 		} else {
 			console.log(''); // separator
@@ -123,18 +191,7 @@ const latestRelease = async ({ userRepo, pattern = /.*/, download }) => {
 		return;
 	}
 
-	links = links.filter((link) => pattUrls.test(link));
-
-	if (!links.length) {
-		console.log(chalk`{red Oops!} No assets found to download`);
-		console.log(USAGE);
-		return;
-	}
-
-
 	if (!download) {
-		const version = getVersion(links[0], pattVersion);
-
 		console.log(''); // separator
 		console.log(chalk`{green Latest release }{yellow.bold ${version}}:`);
 		console.log(`> ${links.join(`\n> `)}`);
@@ -147,7 +204,7 @@ const latestRelease = async ({ userRepo, pattern = /.*/, download }) => {
 			value: link,
 		}));
 
-		const version = getVersion(links[0], pattVersion);
+		// const version = getVersion(links[0], pattVersion);
 
 		const message = chalk`{green Pick which assets to download for} {yellow.bold ${version}}`;
 
@@ -168,6 +225,8 @@ const latestRelease = async ({ userRepo, pattern = /.*/, download }) => {
 		await Promise.all(assets.map(async (link) => {
 			return await downloadPackage(link);
 		}));
+
+		updateRepo(config, userRepo, { name: userRepo, version: semverVersion[0] });
 
 		console.log(chalk`{green.bold All assets written to disk!}`);
 	} catch (err) {

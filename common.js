@@ -12,3 +12,17 @@ exports.getVersion = (link, patt) => {
 
 	return version;
 };
+
+exports.findRepo = (config, userRepo) => {
+	return config.get('repos').find((repo) => repo.name === userRepo);
+};
+
+exports.updateRepo = (config, userRepo, data) => {
+	const repos = config.get('repos');
+	const index = repos.findIndex((repo) => repo.name === userRepo);
+
+	repos.splice(index, 1);
+
+	config.set('repos', [...repos, data]);
+};
+

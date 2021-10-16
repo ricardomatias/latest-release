@@ -39,6 +39,7 @@
 	],
 	"dependencies": {
 		"chalk": "^4.1.0",
+		"conf": "^7.1.2",
 		"del": "^5.1.0",
 		"enquirer": "^2.3.6",
 		"meow": "^7.1.1",
@@ -46,6 +47,7 @@
 		"node-fetch": "^2.6.1",
 		"node-graceful": "^3.0.0",
 		"progress": "^2.0.3",
+		"to-semver": "^3.0.0",
 		"url-regex": "^5.0.0"
 	},
 	"devDependencies": {

@@ -7,9 +7,10 @@ const latestRelease = require('./');
 
 const cli = meow(chalk`
 	{yellow.bold Usage}
-	  $ latest-release [user/repo] [-p] [-d]
+	  $ latest-release [-c] [user/repo] [-p] [-d]
 
 	{yellow.bold Options}
+	  -c, Check if there are any new versions from the previously downloaded artifacts  [Default: false]
 	  -d, --download  Download latest release  [Default: false]
 	  -p, --pattern  RegExp pattern to identify which asset to download
 
@@ -33,15 +34,27 @@ const cli = meow(chalk`
 			type: 'string',
 			alias: 'p',
 		},
+		checkUpdates: {
+			type: 'boolean',
+			default: false,
+			alias: 'c'
+		},
 	},
 }
 );
 
 const [ userRepo ] = cli.input;
-const { pattern, download } = cli.flags;
+const { pattern, download, checkUpdates } = cli.flags;
+
+// CHECK UPDATES
+// * re-use latestRelease function
+// * add a flag to avoid the confirmation prompt if the latest and the previously downloaded version are the same
+if (checkUpdates) {
+
+}
 
 if (!userRepo) {
 	cli.showHelp();
 }
 
-latestRelease({ userRepo, pattern, download });
+latestRelease({ userRepo, pattern, download, checkUpdates });
