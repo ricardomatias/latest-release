@@ -11,11 +11,12 @@
 		"name": "Ricardo Matias",
 		"url": "https://github.com/ricardomatias"
 	},
+	"type": "module",
 	"bin": {
 		"latest-release": "cli.js"
 	},
 	"engines": {
-		"node": ">=8"
+		"node": ">=18"
 	},
 	"scripts": {
 		"test": "echo 'latest-release'"
@@ -38,19 +39,20 @@
 		"download"
 	],
 	"dependencies": {
-		"chalk": "^2.4.2",
-		"del": "^5.1.0",
-		"enquirer": "^2.3.1",
-		"meow": "^5.0.0",
-		"multi-progress": "^2.0.0",
-		"node-fetch": "^2.6.0",
-		"node-graceful": "^2.0.1",
+		"chalk": "^5.3.0",
+		"chalk-template": "^1.1.0",
+		"del": "^7.1.0",
+		"enquirer": "^2.4.1",
+		"meow": "^13.2.0",
+		"multi-progress": "^4.0.0",
+		"node-fetch": "^3.3.2",
+		"node-graceful": "^3.1.0",
 		"progress": "^2.0.3",
-		"url-regex": "^5.0.0"
+		"url-regex-safe": "^4.0.0"
 	},
 	"devDependencies": {
-		"eslint": "^5.16.0",
-		"eslint-config-google": "^0.10.0",
-		"eslint-plugin-import": "^2.18.2"
+		"eslint": "^8.57.0",
+		"eslint-config-google": "^0.14.0",
+		"eslint-plugin-import": "^2.29.1"
 	}
 }

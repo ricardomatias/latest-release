@@ -1,15 +1,22 @@
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const urlRegex = require('url-regex');
-const fetch = require('node-fetch');
-const MultiProgress = require('multi-progress');
-const { USAGE, getVersion } = require('./common');
-const { MultiSelect } = require('enquirer');
-const graceful = require('node-graceful');
-const del = require('del');
+import { createWriteStream } from 'fs';
+import { basename, join } from 'path';
+import chalk from 'chalk-template';
+import fetch from 'node-fetch';
+import MultiProgress from 'multi-progress';
+import { USAGE, getVersion } from './common.js';
+import urlRegexSafe from 'url-regex-safe';
+// @ts-ignore
+import Enquirer from 'enquirer';
+import Graceful from 'node-graceful';
+import { deleteSync } from 'del';
+
+
+Graceful.captureExceptions = true;
+
+const enquirer = new Enquirer();
 
 const PROMPT_OPTS = {
+	type: 'multiselect',
 	name: 'value',
 	limit: 10,
 	result(names) {
@@ -19,33 +26,42 @@ const PROMPT_OPTS = {
 
 const filesInTransit = [];
 
-graceful.on('exit', (done, event, signal) => {
+// @ts-ignore
+Graceful.on('exit', (done, event, signal) => {
 	if (filesInTransit.length) {
 		console.log('\n');
 		console.log(chalk`{green Bye!} Cleaning up the mess before exiting..`);
-		del.sync(filesInTransit);
+		deleteSync(filesInTransit);
 	}
 });
 
 const multiProgress = new MultiProgress();
 
 async function downloadPackage(link) {
-	const filename = path.basename(link);
-	const filePath = path.join(process.cwd(), filename);
+	const filename = basename(link);
+	const filePath = join(process.cwd(), filename);
 
 	filesInTransit.push(filePath);
 
-	const dest = fs.createWriteStream(filePath);
+	const dest = createWriteStream(filePath);
 
 	const res = await fetch(link);
 
-	const len = parseInt(res.headers.get('Content-Length'));
+	if (!res.ok || res.body === null) {
+		const text = await res.text();
+		throw new Error(text);
+	}
+
+	const contentLength = res.headers.get('content-length') ?? "0";
+
+	const len = parseInt(contentLength);
 
 	const progress = chalk`{green.bold Downloading} {yellow ${filename}} {green.bold [:bar]} :percent :etas`;
 
 	let bar;
 
 	return new Promise((resolve, reject) => {
+		// @ts-ignore
 		res.body.on('data', function(chunk) {
 			if (!bar) {
 				bar = multiProgress.newBar(progress, {
@@ -62,16 +78,20 @@ async function downloadPackage(link) {
 			}
 		});
 
+		// @ts-ignore
 		res.body.on('end', function() {
 			const index = filesInTransit.indexOf(filePath);
 
 			filesInTransit.splice(index, 1);
 
+			// @ts-ignore
 			resolve();
 		});
 
+		// @ts-ignore
 		res.body.on('error', (error) => reject(error));
 
+		// @ts-ignore
 		res.body.pipe(dest);
 	});
 }
@@ -86,10 +106,9 @@ const latestRelease = async ({ userRepo, pattern, download }) => {
 
 	const res = await fetch(url);
 	const text = await res.text();
+	const matches = text.match(urlRegexSafe());
 
-	const matches = text.match(urlRegex());
-
-	if (!matches.length) {
+	if (matches === null || !matches.length) {
 		console.log(chalk`{red Oops!} No matching releases found`);
 		console.log(USAGE);
 		return;
@@ -143,7 +162,7 @@ const latestRelease = async ({ userRepo, pattern, download }) => {
 
 	try {
 		const choices = links.map((link) => ({
-			name: path.basename(link),
+			name: basename(link),
 			value: link,
 		}));
 
@@ -151,22 +170,20 @@ const latestRelease = async ({ userRepo, pattern, download }) => {
 
 		const message = chalk`{green Pick which assets to download for} {yellow.bold ${version}}`;
 
-		const prompt = new MultiSelect(Object.assign(PROMPT_OPTS, { choices, message }));
-
-
 		console.log(''); // separator
-		let assets = await prompt.run();
+		// @ts-ignore
+		let {value} = await enquirer.prompt(Object.assign(PROMPT_OPTS, { choices, message }));
 		console.log(''); // separator
 
-		if (!assets.length) {
+		if (!value.length) {
 			console.log(chalk`{yellow Oops!} Guess we're not downloading anything today`);
 			console.log(USAGE);
 
 			return;
 		}
 
-		await Promise.all(assets.map(async (link) => {
-			return await downloadPackage(link);
+		await Promise.all(value.map(async (link) => {
+			return downloadPackage(link);
 		}));
 
 		console.log(chalk`{green.bold All assets written to disk!}`);
@@ -176,4 +193,4 @@ const latestRelease = async ({ userRepo, pattern, download }) => {
 	}
 };
 
-module.exports = latestRelease;
+export default latestRelease;
